@@ -5,7 +5,8 @@ import { useOPhimCountries } from '../hooks/useOPhimCountries'
 import { cn } from '../utils/styles'
 
 const navLinkClass = 'relative whitespace-nowrap bg-transparent p-0 text-sm font-bold text-[#f7fbff]/80 transition after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-0 after:bg-[#ffb347] after:transition-all hover:text-[#f7fbff] hover:after:w-full'
-const dropdownPanelClass = 'invisible absolute left-1/2 top-[calc(100%+1rem)] z-[120] grid max-h-[72vh] -translate-x-1/2 translate-y-2 gap-y-2 overflow-y-auto rounded-lg border border-[#3a3a3a] bg-[#101010] p-3 opacity-0 shadow-none transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100'
+const dropdownGroupClass = 'group relative -mb-4 pb-4'
+const dropdownPanelClass = 'invisible absolute left-1/2 top-[calc(100%+0.35rem)] z-[120] grid max-h-[72vh] -translate-x-1/2 translate-y-2 gap-y-2 overflow-y-auto rounded-lg border border-[#3a3a3a] bg-[#101010] p-3 opacity-0 shadow-none transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100'
 const dropdownItemClass = 'rounded-md border border-transparent px-3 py-2 text-sm font-bold text-[#f7fbff]/90 transition hover:bg-[#2f2f2f] hover:text-[#f7fbff] focus:border-[#5a5a5a] focus:bg-[#2f2f2f] focus:text-[#f7fbff] focus:outline-none'
 
 const mobileNavItems = [
@@ -93,7 +94,7 @@ function Navbar() {
                         <Link to="/" className={navLinkClass}>Trang chủ</Link>
                         <Link to="/search" className={navLinkClass}>Phim</Link>
 
-                        <div className="group relative" onMouseEnter={() => setShouldLoadTaxonomies(true)} onFocus={() => setShouldLoadTaxonomies(true)}>
+                        <div className={dropdownGroupClass} onMouseEnter={() => setShouldLoadTaxonomies(true)} onFocus={() => setShouldLoadTaxonomies(true)}>
                             <button type="button" className={cn(navLinkClass, 'inline-flex items-center gap-1')}>
                                 Thể loại
                                 <span className="mt-0.5 size-0 border-x-4 border-t-[5px] border-x-transparent border-t-current" aria-hidden="true" />
@@ -112,7 +113,7 @@ function Navbar() {
                         <Link to="/favorites" className={navLinkClass}>Yêu thích</Link>
                         <Link to="/sort" className={navLinkClass}>Sort</Link>
 
-                        <div className="group relative" onMouseEnter={() => setShouldLoadTaxonomies(true)} onFocus={() => setShouldLoadTaxonomies(true)}>
+                        <div className={dropdownGroupClass} onMouseEnter={() => setShouldLoadTaxonomies(true)} onFocus={() => setShouldLoadTaxonomies(true)}>
                             <button type="button" className={cn(navLinkClass, 'inline-flex items-center gap-1')}>
                                 Quốc gia
                                 <span className="mt-0.5 size-0 border-x-4 border-t-[5px] border-x-transparent border-t-current" aria-hidden="true" />
