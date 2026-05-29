@@ -9,8 +9,7 @@ import type {
 } from '../types/ophim'
 import type { AppCastMember } from '../types/tmdb'
 
-const OPHIM_API_BASE_URL = import.meta.env.VITE_OPHIM_API_BASE_URL
-    || (import.meta.env.PROD ? '/api/ophim' : 'https://ophim1.com/v1/api')
+const OPHIM_API_BASE_URL = import.meta.env.VITE_OPHIM_API_BASE_URL || 'https://ophim1.com/v1/api'
 
 async function requestJson<TResponse>(path: string, signal?: AbortSignal): Promise<TResponse> {
     const response = await fetch(`${OPHIM_API_BASE_URL}${path}`, { signal })
