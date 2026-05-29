@@ -13,10 +13,64 @@ type OPhimListSectionState = {
 
 const listSectionCache = new Map<string, OPhimListSectionState>()
 const pendingListSectionRequests = new Map<string, Promise<OPhimListSectionState>>()
+const LIST_SECTION_CACHE_KEY = 'relaxvibe:ophim-list-sections:v1'
+const LIST_SECTION_CACHE_TTL = 1000 * 60 * 20
+
+function readStoredListSection(slug: string): OPhimListSectionState | null {
+    if (typeof window === 'undefined') {
+        return null
+    }
+
+    try {
+        const rawCache = window.localStorage.getItem(LIST_SECTION_CACHE_KEY)
+
+        if (!rawCache) {
+            return null
+        }
+
+        const cache = JSON.parse(rawCache)
+        const sectionCache = cache?.[slug]
+        const isFresh = Date.now() - Number(sectionCache?.savedAt || 0) < LIST_SECTION_CACHE_TTL
+
+        if (!isFresh || !Array.isArray(sectionCache.movies)) {
+            return null
+        }
+
+        return {
+            movies: sectionCache.movies,
+            loading: false,
+            loaded: true,
+            error: null,
+        }
+    } catch {
+        return null
+    }
+}
+
+function writeStoredListSection(slug: string, movies: AppMovie[]) {
+    if (typeof window === 'undefined') {
+        return
+    }
+
+    try {
+        const rawCache = window.localStorage.getItem(LIST_SECTION_CACHE_KEY)
+        const cache = rawCache ? JSON.parse(rawCache) : {}
+
+        cache[slug] = {
+            movies,
+            savedAt: Date.now(),
+        }
+
+        window.localStorage.setItem(LIST_SECTION_CACHE_KEY, JSON.stringify(cache))
+    } catch {
+        // localStorage can be unavailable or out of quota.
+    }
+}
 
 export function useOPhimListSection(config: OPhimHomeListConfig, enabled: boolean): OPhimListSectionState {
     const requestedSlugRef = useRef<string | null>(null)
-    const [state, setState] = useState<OPhimListSectionState>(listSectionCache.get(config.slug) || {
+    const initialCachedState = listSectionCache.get(config.slug) || readStoredListSection(config.slug)
+    const [state, setState] = useState<OPhimListSectionState>(initialCachedState || {
         movies: [],
         loading: false,
         loaded: false,
@@ -28,6 +82,14 @@ export function useOPhimListSection(config: OPhimHomeListConfig, enabled: boolea
 
         if (cachedState) {
             setState(cachedState)
+            return undefined
+        }
+
+        const storedState = readStoredListSection(config.slug)
+
+        if (storedState) {
+            listSectionCache.set(config.slug, storedState)
+            setState(storedState)
             return undefined
         }
 
@@ -59,6 +121,7 @@ export function useOPhimListSection(config: OPhimHomeListConfig, enabled: boolea
                             }
 
                             listSectionCache.set(config.slug, nextState)
+                            writeStoredListSection(config.slug, nextState.movies)
                             return nextState
                         })
                         .finally(() => {

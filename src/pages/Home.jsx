@@ -2,7 +2,6 @@ import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import MovieCard from '../components/MovieCard'
 import MovieRail from '../components/MovieRail'
-import { useInView } from '../hooks/useInView'
 import { useOPhimHome } from '../hooks/useOPhimHome'
 import { useOPhimListSection } from '../hooks/useOPhimListSection'
 import { getHeroMetaItems } from '../utils/movieDisplay'
@@ -21,6 +20,7 @@ const SECTION_SKELETON_ITEMS = 6
 const HERO_MOVIES_COUNT = 6
 const HERO_AUTO_PLAY_DELAY = 6500
 const HERO_SWIPE_THRESHOLD = 48
+const SECTION_PRELOAD_DELAY = 520
 
 function MovieRailSkeleton() {
     return (
@@ -53,8 +53,60 @@ const regionCountrySlugMap = {
 
 const REGIONS = ['Hàn Quốc', 'Trung Quốc', 'Âu Mỹ']
 
-const LazyHomeListSection = memo(function LazyHomeListSection({ config }) {
-    const [sectionRef, shouldLoad] = useInView()
+function scheduleIdleWork(callback) {
+    if ('requestIdleCallback' in window) {
+        const idleId = window.requestIdleCallback(callback, { timeout: 1400 })
+
+        return () => window.cancelIdleCallback(idleId)
+    }
+
+    const timeoutId = window.setTimeout(callback, 220)
+
+    return () => window.clearTimeout(timeoutId)
+}
+
+function useStaggeredSectionPreload(isReady, sectionCount) {
+    const [readySectionCount, setReadySectionCount] = useState(0)
+
+    useEffect(() => {
+        if (!isReady) {
+            setReadySectionCount(0)
+            return undefined
+        }
+
+        let isCancelled = false
+        let timeoutId
+        let cancelIdleWork = () => {}
+
+        const loadNextSection = () => {
+            if (isCancelled) {
+                return
+            }
+
+            setReadySectionCount((currentCount) => {
+                const nextCount = Math.min(currentCount + 1, sectionCount)
+
+                if (nextCount < sectionCount) {
+                    timeoutId = window.setTimeout(loadNextSection, SECTION_PRELOAD_DELAY)
+                }
+
+                return nextCount
+            })
+        }
+
+        cancelIdleWork = scheduleIdleWork(loadNextSection)
+
+        return () => {
+            isCancelled = true
+            cancelIdleWork()
+            window.clearTimeout(timeoutId)
+        }
+    }, [isReady, sectionCount])
+
+    return readySectionCount
+}
+
+const LazyHomeListSection = memo(function LazyHomeListSection({ config, shouldLoad }) {
     const { movies, loading, loaded, error } = useOPhimListSection(config, shouldLoad)
 
     if (loaded && !loading && !error && movies.length === 0) {
@@ -62,7 +114,7 @@ const LazyHomeListSection = memo(function LazyHomeListSection({ config }) {
     }
 
     return (
-        <section className="grid w-full gap-6 px-4 pt-14 md:grid-cols-[minmax(170px,220px)_minmax(0,1fr)] md:px-8" ref={sectionRef}>
+        <section className="grid w-full gap-6 px-4 pt-14 [content-visibility:auto] [contain-intrinsic-size:360px] md:grid-cols-[minmax(170px,220px)_minmax(0,1fr)] md:px-8">
                 <div className="flex items-start justify-between gap-4 md:block">
                     <div>
                         <h2 className="text-2xl font-black text-[#ffb347]">{config.title}</h2>
@@ -218,6 +270,7 @@ function HeroCarousel({ movies }) {
 
 function Home() {
     const { movies: homeMovies, loading } = useOPhimHome()
+    const readyHomeListSectionCount = useStaggeredSectionPreload(!loading && homeMovies.length > 0, homeListSections.length)
     const { heroMovies, regionalSections, trendingMovies } = useMemo(() => {
         const sortedMovies = sortTrendingFirst(homeMovies)
         const trendingItems = sortedMovies.filter((movie) => movie.trending)
@@ -264,7 +317,7 @@ function Home() {
 
             {regionalSections.map((section) => (
                 section.movies.length > 0 && (
-                    <section className="grid w-full gap-6 px-4 pt-14 md:grid-cols-[minmax(170px,220px)_minmax(0,1fr)] md:px-8" key={section.region}>
+                    <section className="grid w-full gap-6 px-4 pt-14 [content-visibility:auto] [contain-intrinsic-size:360px] md:grid-cols-[minmax(170px,220px)_minmax(0,1fr)] md:px-8" key={section.region}>
                         <div className="flex items-start justify-between gap-4 md:block">
                             <div>
                                 <h2 className="text-2xl font-black text-[#ffb347]">Phim mới {section.region}</h2>
@@ -282,11 +335,15 @@ function Home() {
                 )
             ))}
 
-            {homeListSections.map((section) => (
-                <LazyHomeListSection config={section} key={section.slug} />
+            {homeListSections.map((section, index) => (
+                <LazyHomeListSection
+                    config={section}
+                    key={section.slug}
+                    shouldLoad={index < readyHomeListSectionCount}
+                />
             ))}
 
-            <section className="grid w-full gap-6 px-4 pt-14 md:grid-cols-[minmax(170px,220px)_minmax(0,1fr)] md:px-8">
+            <section className="grid w-full gap-6 px-4 pt-14 [content-visibility:auto] [contain-intrinsic-size:360px] md:grid-cols-[minmax(170px,220px)_minmax(0,1fr)] md:px-8">
                 <div className="flex items-start justify-between gap-4 md:block">
                     <div>
                         <h2 className="text-2xl font-black text-[#ffb347]">Tất cả phim</h2>
