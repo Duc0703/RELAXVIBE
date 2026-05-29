@@ -5,8 +5,8 @@ import { useOPhimCountries } from '../hooks/useOPhimCountries'
 import { cn } from '../utils/styles'
 
 const navLinkClass = 'relative whitespace-nowrap bg-transparent p-0 text-sm font-bold text-[#f7fbff]/80 transition after:absolute after:-bottom-1.5 after:left-0 after:h-0.5 after:w-0 after:bg-[#ffb347] after:transition-all hover:text-[#f7fbff] hover:after:w-full'
-const dropdownPanelClass = 'invisible absolute left-1/2 top-[calc(100%+1rem)] z-[120] grid max-h-[72vh] -translate-x-1/2 translate-y-2 gap-y-2 overflow-y-auto rounded-lg border border-white/10 bg-[linear-gradient(145deg,rgba(255,159,26,0.12),rgba(247,251,255,0.04)),rgba(7,9,17,0.98)] p-3 opacity-0 shadow-[0_28px_80px_rgba(0,0,0,0.48)] transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100'
-const dropdownItemClass = 'rounded-md px-3 py-2 text-sm font-bold text-[#f7fbff]/90 transition hover:translate-x-1 hover:bg-white/15 hover:text-[#ffe4c7] focus:bg-white/15 focus:text-[#ffe4c7] focus:outline-none'
+const dropdownPanelClass = 'invisible absolute left-1/2 top-[calc(100%+1rem)] z-[120] grid max-h-[72vh] -translate-x-1/2 translate-y-2 gap-y-2 overflow-y-auto rounded-lg border border-[#3a3a3a] bg-[#101010] p-3 opacity-0 shadow-none transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100'
+const dropdownItemClass = 'rounded-md border border-transparent px-3 py-2 text-sm font-bold text-[#f7fbff]/90 transition hover:bg-[#2f2f2f] hover:text-[#f7fbff] focus:border-[#5a5a5a] focus:bg-[#2f2f2f] focus:text-[#f7fbff] focus:outline-none'
 
 const mobileNavItems = [
     { label: 'Home', to: '/', match: (pathname) => pathname === '/' },
