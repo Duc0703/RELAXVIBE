@@ -10,7 +10,7 @@ type OPhimCategoriesState = {
 
 let cachedCategoriesState: OPhimCategoriesState | null = null
 
-export function useOPhimCategories(): OPhimCategoriesState {
+export function useOPhimCategories(enabled = true): OPhimCategoriesState {
     const [state, setState] = useState<OPhimCategoriesState>(cachedCategoriesState || {
         categories: fallbackCategoryOptions,
         loading: true,
@@ -19,6 +19,10 @@ export function useOPhimCategories(): OPhimCategoriesState {
 
     useEffect(() => {
         if (cachedCategoriesState) {
+            return undefined
+        }
+
+        if (!enabled) {
             return undefined
         }
 
@@ -56,7 +60,7 @@ export function useOPhimCategories(): OPhimCategoriesState {
         loadCategories()
 
         return () => controller.abort()
-    }, [])
+    }, [enabled])
 
     return state
 }

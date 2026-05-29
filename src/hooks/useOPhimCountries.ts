@@ -10,7 +10,7 @@ type OPhimCountriesState = {
 
 let cachedCountriesState: OPhimCountriesState | null = null
 
-export function useOPhimCountries(): OPhimCountriesState {
+export function useOPhimCountries(enabled = true): OPhimCountriesState {
     const [state, setState] = useState<OPhimCountriesState>(cachedCountriesState || {
         countries: fallbackCountryOptions,
         loading: true,
@@ -19,6 +19,10 @@ export function useOPhimCountries(): OPhimCountriesState {
 
     useEffect(() => {
         if (cachedCountriesState) {
+            return undefined
+        }
+
+        if (!enabled) {
             return undefined
         }
 
@@ -56,7 +60,7 @@ export function useOPhimCountries(): OPhimCountriesState {
         loadCountries()
 
         return () => controller.abort()
-    }, [])
+    }, [enabled])
 
     return state
 }

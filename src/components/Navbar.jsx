@@ -17,11 +17,12 @@ function Navbar() {
     const [searchQuery, setSearchQuery] = useState('')
     const [isScrolled, setIsScrolled] = useState(false)
     const [navbarHeight, setNavbarHeight] = useState(0)
+    const [shouldLoadTaxonomies, setShouldLoadTaxonomies] = useState(false)
     const navbarRef = useRef(null)
     const location = useLocation()
     const navigate = useNavigate()
-    const { categories } = useOPhimCategories()
-    const { countries } = useOPhimCountries()
+    const { categories } = useOPhimCategories(shouldLoadTaxonomies)
+    const { countries } = useOPhimCountries(shouldLoadTaxonomies)
     const isHomePage = location.pathname === '/'
     const isImmersivePage = location.pathname.startsWith('/sort')
     const isWatchPage = location.pathname.startsWith('/watch')
@@ -90,7 +91,7 @@ function Navbar() {
                         <Link to="/" className={navLinkClass}>Trang chủ</Link>
                         <Link to="/search" className={navLinkClass}>Phim</Link>
 
-                        <div className="group relative">
+                        <div className="group relative" onMouseEnter={() => setShouldLoadTaxonomies(true)} onFocus={() => setShouldLoadTaxonomies(true)}>
                             <button type="button" className={cn(navLinkClass, 'inline-flex items-center gap-1')}>
                                 Thể loại
                                 <span className="mt-0.5 size-0 border-x-4 border-t-[5px] border-x-transparent border-t-current" aria-hidden="true" />
@@ -109,7 +110,7 @@ function Navbar() {
                         <Link to="/favorites" className={navLinkClass}>Yêu thích</Link>
                         <Link to="/sort" className={navLinkClass}>Sort</Link>
 
-                        <div className="group relative">
+                        <div className="group relative" onMouseEnter={() => setShouldLoadTaxonomies(true)} onFocus={() => setShouldLoadTaxonomies(true)}>
                             <button type="button" className={cn(navLinkClass, 'inline-flex items-center gap-1')}>
                                 Quốc gia
                                 <span className="mt-0.5 size-0 border-x-4 border-t-[5px] border-x-transparent border-t-current" aria-hidden="true" />
